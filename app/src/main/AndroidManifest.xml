@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Drawing">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.draw.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -4,15 +4,59 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ui.draw.MainActivity">
 
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/draw_tool_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" >
+
+        <ImageButton
+            android:id="@+id/paint_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="?attr/icon_paint"
+            android:background="?selectableItemBackgroundBorderless"
+            app:layout_constraintStart_toStartOf="@id/draw_tool_layout"
+            app:layout_constraintEnd_toStartOf="@id/eraser_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed" />
+
+        <ImageButton
+            android:id="@+id/eraser_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="?attr/icon_eraser"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toEndOf="@id/paint_button"
+            app:layout_constraintEnd_toStartOf="@id/palette_button"
+            app:layout_constraintTop_toTopOf="@id/paint_button" />
+
+        <ImageButton
+            android:id="@+id/palette_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="?attr/icon_palette"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toEndOf="@id/eraser_button"
+            app:layout_constraintEnd_toStartOf="@id/background_button"
+            app:layout_constraintTop_toTopOf="@id/paint_button" />
+
+        <ImageButton
+            android:id="@+id/background_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="?attr/icon_background"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toEndOf="@id/draw_tool_layout"
+            app:layout_constraintStart_toEndOf="@id/palette_button"
+            app:layout_constraintTop_toTopOf="@id/paint_button" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

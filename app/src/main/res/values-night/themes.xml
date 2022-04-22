@@ -12,5 +12,12 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <!-- Icon src in DrawActivity-->
+        <item name="icon_paint">@drawable/icon_paint_night</item>
+        <item name="icon_eraser">@drawable/icon_eraser_night</item>
+        <item name="icon_palette">@drawable/icon_palette_night</item>
+        <item name="icon_background">@drawable/icon_background_night</item>
+        <item name="icon_solid_line">@drawable/icon_solid_line_night</item>
+        <item name="icon_dashed_line">@drawable/icon_dashed_line_night</item>
     </style>
 </resources>
