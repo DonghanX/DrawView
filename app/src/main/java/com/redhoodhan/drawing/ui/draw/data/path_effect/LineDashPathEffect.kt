@@ -1,11 +1,8 @@
-package com.redhoodhan.drawing.ui.draw.data
+package com.redhoodhan.drawing.ui.draw.data.path_effect
 
 import android.graphics.DashPathEffect
 import java.util.*
 
-/**
- * Note that we changed the dashed gap according to current brush size
- */
 class LineDashPathEffect(val brushSize: Float) :
     DashPathEffect(floatArrayOf(brushSize, brushSize * 2, brushSize, brushSize * 3), 0f) {
 

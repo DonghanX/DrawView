@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="icon_paint" format="reference"/>
-    <attr name="icon_eraser" format="reference"/>
-    <attr name="icon_palette" format="reference"/>
-    <attr name="icon_background" format="reference"/>
-    <attr name="icon_dashed_line" format="reference"/>
-    <attr name="icon_solid_line" format="reference"/>
+    <attr name="icon_paint_solid" format="reference" />
+    <attr name="icon_paint_dashed" format="reference" />
+    <attr name="icon_eraser" format="reference" />
+    <attr name="icon_palette" format="reference" />
+    <attr name="icon_background" format="reference" />
+    <attr name="icon_dashed_line" format="reference" />
+    <attr name="icon_solid_line" format="reference" />
+
+    <!-- Custom View Attribute -->
+    <declare-styleable name="StateImageButton">
+        <attr name="selectedColor" format="reference" />
+        <attr name="originalColor" format="reference" />
+    </declare-styleable>
 </resources>

@@ -6,55 +6,106 @@
     android:layout_height="match_parent"
     tools:context=".ui.draw.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/draw_tool_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" >
+    <com.redhoodhan.drawing.ui.draw.DrawView
+        android:id="@+id/draw_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-        <ImageButton
-            android:id="@+id/paint_button"
+    <com.redhoodhan.drawing.ui.common.StateImageButton
+        android:id="@+id/undo_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/icon_undo"
+        app:layout_constraintEnd_toStartOf="@id/redo_button"
+        app:layout_constraintTop_toTopOf="@id/redo_button"
+        app:originalColor="@color/gray"
+        app:selectedColor="@color/black" />
+
+    <com.redhoodhan.drawing.ui.common.StateImageButton
+        android:id="@+id/redo_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="60dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/icon_redo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:originalColor="@color/gray"
+        app:selectedColor="@color/black" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/draw_option_layout"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginHorizontal="60dp"
+        android:background="@color/white"
+        android:clickable="true"
+        android:elevation="2dp"
+        android:focusable="true"
+        android:translationY="@dimen/draw_option_translation_y_init"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.redhoodhan.drawing.ui.common.StateImageButton
+            android:id="@+id/paint_solid_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="?attr/icon_paint"
             android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintStart_toStartOf="@id/draw_tool_layout"
-            app:layout_constraintEnd_toStartOf="@id/eraser_button"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_chainStyle="packed" />
+            android:src="?attr/icon_paint_solid"
+            app:layout_constraintEnd_toStartOf="@id/paint_dashed_button"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toStartOf="@id/draw_option_layout"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
+        <com.redhoodhan.drawing.ui.common.StateImageButton
+            android:id="@+id/paint_dashed_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="?attr/icon_paint_dashed"
+            app:layout_constraintEnd_toStartOf="@id/eraser_button"
+            app:layout_constraintStart_toEndOf="@id/paint_solid_button"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.redhoodhan.drawing.ui.common.StateImageButton
             android:id="@+id/eraser_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="?attr/icon_eraser"
             android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintStart_toEndOf="@id/paint_button"
+            android:src="?attr/icon_eraser"
             app:layout_constraintEnd_toStartOf="@id/palette_button"
-            app:layout_constraintTop_toTopOf="@id/paint_button" />
+            app:layout_constraintStart_toEndOf="@id/paint_dashed_button"
+            app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
-        <ImageButton
+        <com.redhoodhan.drawing.ui.common.StateImageButton
             android:id="@+id/palette_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="?attr/icon_palette"
             android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintStart_toEndOf="@id/eraser_button"
+            android:src="?attr/icon_palette"
             app:layout_constraintEnd_toStartOf="@id/background_button"
-            app:layout_constraintTop_toTopOf="@id/paint_button" />
+            app:layout_constraintStart_toEndOf="@id/eraser_button"
+            app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
-        <ImageButton
+        <com.redhoodhan.drawing.ui.common.StateImageButton
             android:id="@+id/background_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="?attr/icon_background"
             android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintEnd_toEndOf="@id/draw_tool_layout"
+            android:src="?attr/icon_background"
+            app:layout_constraintEnd_toEndOf="@id/draw_option_layout"
             app:layout_constraintStart_toEndOf="@id/palette_button"
-            app:layout_constraintTop_toTopOf="@id/paint_button" />
+            app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/draw_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/paint_solid_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
