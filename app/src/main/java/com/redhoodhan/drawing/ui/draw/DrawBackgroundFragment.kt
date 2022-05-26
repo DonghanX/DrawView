@@ -22,6 +22,8 @@ class DrawBackgroundFragment : Fragment() {
 
     private var colorAdapter: DrawColorResAdapter? = null
 
+    private var imgResAdapter: DrawImgResAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -38,7 +40,8 @@ class DrawBackgroundFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initRecyclerView()
+        initColorRecyclerView()
+        initImgResRecyclerView()
     }
 
     companion object {
@@ -46,7 +49,28 @@ class DrawBackgroundFragment : Fragment() {
         fun newInstance() = DrawBackgroundFragment()
     }
 
-    private fun initRecyclerView() {
+    private fun initImgResRecyclerView() {
+        val linearLayoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+        viewModel.backgroundList?.let {
+            imgResAdapter = DrawImgResAdapter(it).also { adapter ->
+                adapter.imgSelectCallback = { imgResId ->
+                    onImgItemSelected(imgResId)
+                }
+            }
+        }
+
+        binding.drawBgRecyclerView.apply {
+            adapter = imgResAdapter
+            layoutManager = linearLayoutManager
+        }
+    }
+
+    private fun initColorRecyclerView() {
+        val linearLayoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
         viewModel.colorList?.let {
             colorAdapter = DrawColorResAdapter(it).also { adapter ->
                 adapter.colorSelectCallback = { colorResId ->
@@ -55,9 +79,6 @@ class DrawBackgroundFragment : Fragment() {
             }
         }
 
-        val linearLayoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-
         binding.drawColorRecyclerView.apply {
             adapter = colorAdapter
             layoutManager = linearLayoutManager
@@ -65,7 +86,11 @@ class DrawBackgroundFragment : Fragment() {
     }
 
     private fun onColorItemSelected(colorResId: Int) {
-        viewModel.backgroundColorClickLiveData.postValue(colorResId)
+        viewModel.backgroundColorLiveData.postValue(colorResId)
+    }
+
+    private fun onImgItemSelected(imgResId: Int) {
+        viewModel.backgroundImgResLiveData.postValue(imgResId)
     }
 
 

@@ -132,16 +132,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun initObservers() {
         viewModel.let {
-            it.drawColorClickLiveData.observe(this) { colorId ->
+            it.drawColorLiveData.observe(this) { colorId ->
                 onDrawColorChanged(colorId)
             }
 
-            it.drawBrushSizeClickLiveData.observe(this) { brushSize ->
+            it.drawBrushSizeLiveData.observe(this) { brushSize ->
                 onBrushSizeChanged(brushSize)
             }
 
-            it.backgroundColorClickLiveData.observe(this) { colorId ->
+            it.backgroundColorLiveData.observe(this) { colorId ->
                 onBackgroundColorChanged(colorId)
+            }
+
+            it.backgroundImgResLiveData.observe(this) { imgResId ->
+                onBackgroundImgResChanged(imgResId)
             }
         }
     }
@@ -170,6 +174,10 @@ class MainActivity : AppCompatActivity() {
     private fun onBackgroundColorChanged(colorResId: Int) {
         binding.drawView.canvasBackgroundColor =
             ResourcesCompat.getColor(resources, colorResId, null)
+    }
+
+    private fun onBackgroundImgResChanged(imgResId: Int) {
+        binding.drawView.canvasBackgroundImg = imgResId
     }
 
     private fun initDefaultDrawOptions() {

@@ -338,7 +338,6 @@ class DrawView @JvmOverloads constructor(
             else -> return false
         }
 
-        // Performs drawing process by calling View.draw function
         invalidate()
 
         return true

@@ -5,8 +5,16 @@ import com.redhoodhan.drawing.R
 class DrawRepository {
 
     val colorList = mutableListOf<Int>()
+    
+    val backgroundList = mutableListOf<Int>()
 
     init {
+        initColorList()
+        
+        initBackgroundList()
+    }
+    
+    private fun initColorList() {
         colorList.apply {
             add(R.color.black)
             add(R.color.hotpink)
@@ -39,6 +47,13 @@ class DrawRepository {
             add(R.color.darkturquoise)
             add(R.color.mediumblue)
             add(R.color.white)
+        }
+    }
+    
+    private fun initBackgroundList() {
+        backgroundList.apply { 
+            add(R.drawable.img_draw_background_1)
+            add(R.drawable.img_draw_background_2)
         }
     }
 

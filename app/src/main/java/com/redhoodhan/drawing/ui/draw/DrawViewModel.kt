@@ -1,7 +1,5 @@
 package com.redhoodhan.drawing.ui.draw
 
-import android.graphics.Color
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.redhoodhan.drawing.ui.draw.data.DrawRepository
@@ -21,19 +19,25 @@ class DrawViewModel : ViewModel() {
      * LiveData that stores the color resource id corresponding to the selected item in the recycler
      * view in the [DrawOptionFragment].
      */
-    val drawColorClickLiveData: MutableLiveData<Int> = MutableLiveData()
+    val drawColorLiveData: MutableLiveData<Int> = MutableLiveData()
 
     /**
      * LiveData that stores the color resource id corresponding to the selected item in the recycler
      * view in the [DrawBackgroundFragment].
      */
-    val backgroundColorClickLiveData: MutableLiveData<Int> = MutableLiveData()
+    val backgroundColorLiveData: MutableLiveData<Int> = MutableLiveData()
+
+    /**
+     * LiveData that stores the drawable resource id corresponding to the selected item in the recycler
+     * view in the [DrawBackgroundFragment].
+     */
+    val backgroundImgResLiveData: MutableLiveData<Int> = MutableLiveData()
 
     /**
      * LiveData that stores the brush size in Float to the selected item in the recycler view in the
      * [DrawOptionFragment].
      */
-    val drawBrushSizeClickLiveData: MutableLiveData<Float> = MutableLiveData()
+    val drawBrushSizeLiveData: MutableLiveData<Float> = MutableLiveData()
 
     var lastClickedStateButtonId: Int
             by Delegates.observable(0) { _, oldValue, newValue ->
@@ -47,10 +51,13 @@ class DrawViewModel : ViewModel() {
     val colorList: List<Int>?
         get() = mRepo?.colorList
 
+    val backgroundList: List<Int>?
+        get() = mRepo?.backgroundList
+
     var defaultBrushSize: Float = 20F
 
     fun changeBrushSizeFromSeekBarProgress(progress: Int, maxProgress: Int = 50) {
-        drawBrushSizeClickLiveData.postValue(progress.toFloat())
+        drawBrushSizeLiveData.postValue(progress.toFloat())
     }
 
     override fun onCleared() {

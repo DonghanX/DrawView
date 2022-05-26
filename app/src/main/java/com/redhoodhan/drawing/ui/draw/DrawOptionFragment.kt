@@ -78,7 +78,7 @@ class DrawOptionFragment : Fragment() {
     }
 
     private fun onColorItemSelected(colorResId: Int) {
-        viewModel.drawColorClickLiveData.postValue(colorResId)
+        viewModel.drawColorLiveData.postValue(colorResId)
 
         changeSeekBarThumbColor(colorResId)
     }
