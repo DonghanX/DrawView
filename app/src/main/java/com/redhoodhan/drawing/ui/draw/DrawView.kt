@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.redhoodhan.drawing.ui.draw.data.draw_option.BrushType
@@ -26,6 +27,12 @@ class DrawView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : View(context, attributeSet, defStyle) {
 
+//    // Double buffering canvas
+//    private var bufferCanvas: Canvas? = null
+//
+//    // Double buffering bitmap
+//    private var bufferBitmap: Bitmap? = null
+
     // Path of the current draw
     private var drawPath = DrawPath()
 
@@ -40,6 +47,10 @@ class DrawView @JvmOverloads constructor(
 
     // Boolean flag to determine the background resource type
     private var isCanvasBackgroundImg = false
+
+    private var isCanvasBackgroundChanged = false
+
+    private var prevCanvasBackgroundImgResId: Int = 0
 
     private var _lineType: LineType = LineType.SOLID
         set(value) {
@@ -96,9 +107,6 @@ class DrawView @JvmOverloads constructor(
             strokeCap = Paint.Cap.ROUND
         }
 
-        // Sets the LayerType as LAYER_TYPE_SOFTWARE so that we can use PorterDuff.Xfermode effects
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
-
         _drawState = DrawViewState()
     }
 
@@ -138,6 +146,7 @@ class DrawView @JvmOverloads constructor(
     var canvasBackgroundColor = DEFAULT_CANVAS_COLOR
         set(value) {
             field = value
+            isCanvasBackgroundChanged = true
             isCanvasBackgroundImg = false
             invalidate()
         }
@@ -150,6 +159,7 @@ class DrawView @JvmOverloads constructor(
     var canvasBackgroundImg: Int? = null
         set(value) {
             field = value
+            isCanvasBackgroundChanged = true
             isCanvasBackgroundImg = (value != null)
             invalidate()
         }
@@ -282,15 +292,28 @@ class DrawView @JvmOverloads constructor(
             drawCurrent(it)
         }
 
-        // Updates flags in DrawState
-
         super.onDraw(canvas)
     }
 
+    /**
+     * TODO: try to design another approach to set the background of the canvas.
+     *
+     * Note that this is really an expensive operation if we call this function in [onDraw], because
+     * [onDraw] is called frequently to redraw the previous and the current paths.
+     *
+     * One possible optimizing solution is using the SurfaceView to operate the background drawing
+     * process.
+     *
+     * Another possible optimizing solution might be using Double Buffering technique.
+     */
     private fun setBackground(canvas: Canvas) {
         if (isCanvasBackgroundImg) {
-            canvasBackgroundImg?.let {
-                setBackgroundResource(it)
+            if (isCanvasBackgroundChanged) {
+                canvasBackgroundImg?.let {
+                    setBackgroundResource(it)
+                }
+                Log.e(TAG, "setBackground: ImgBackground")
+                isCanvasBackgroundChanged = false
             }
         } else {
             // Removes previous background
@@ -301,7 +324,6 @@ class DrawView @JvmOverloads constructor(
     }
 
     private fun drawCurrent(canvas: Canvas) {
-        // TODO: add new features about drawing with ImageBrush using Canvas.drawBitmap function
         canvas.drawPath(drawPath, drawPaint)
     }
 
