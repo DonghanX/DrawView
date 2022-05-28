@@ -16,9 +16,8 @@
     <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/brush_size_seekbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="60"
-        android:min="10"
+        android:layout_height="30dp"
+        android:max="80"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/draw_color_recycler_view"
         app:layout_constraintBottom_toBottomOf="parent"/>

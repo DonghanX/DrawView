@@ -39,7 +39,9 @@ class DrawViewModel : ViewModel() {
      */
     val drawBrushSizeLiveData: MutableLiveData<Float> = MutableLiveData()
 
-    var lastClickedStateButtonId: Int
+    var storedClickedStateButtonId: Int = 0
+
+    var curClickedStateButtonId: Int
             by Delegates.observable(0) { _, oldValue, newValue ->
                 _needsShowDrawOptionPanel =
                     ((oldValue == newValue))
@@ -54,7 +56,7 @@ class DrawViewModel : ViewModel() {
     val backgroundList: List<Int>?
         get() = mRepo?.backgroundList
 
-    var defaultBrushSize: Float = 20F
+    var defaultBrushSize: Float = DEFAULT_STROKE_WIDTH
 
     fun changeBrushSizeFromSeekBarProgress(progress: Int, maxProgress: Int = 50) {
         drawBrushSizeLiveData.postValue(progress.toFloat())

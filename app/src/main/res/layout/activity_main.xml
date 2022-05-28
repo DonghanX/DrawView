@@ -66,9 +66,19 @@
             android:layout_height="40dp"
             android:background="?selectableItemBackgroundBorderless"
             android:src="?attr/icon_paint_dashed"
-            app:layout_constraintEnd_toStartOf="@id/eraser_button"
+            app:layout_constraintEnd_toStartOf="@id/paint_chisel_tip_button"
             app:layout_constraintStart_toEndOf="@id/paint_solid_button"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.redhoodhan.drawing.ui.common.StateImageButton
+            android:id="@+id/paint_chisel_tip_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="?attr/icon_chisel_tip"
+            app:layout_constraintStart_toEndOf="@id/paint_dashed_button"
+            app:layout_constraintEnd_toStartOf="@id/eraser_button"
+            app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
         <com.redhoodhan.drawing.ui.common.StateImageButton
             android:id="@+id/eraser_button"
@@ -76,18 +86,8 @@
             android:layout_height="40dp"
             android:background="?selectableItemBackgroundBorderless"
             android:src="?attr/icon_eraser"
-            app:layout_constraintEnd_toStartOf="@id/palette_button"
-            app:layout_constraintStart_toEndOf="@id/paint_dashed_button"
-            app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
-
-        <com.redhoodhan.drawing.ui.common.StateImageButton
-            android:id="@+id/palette_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?selectableItemBackgroundBorderless"
-            android:src="?attr/icon_palette"
             app:layout_constraintEnd_toStartOf="@id/background_button"
-            app:layout_constraintStart_toEndOf="@id/eraser_button"
+            app:layout_constraintStart_toEndOf="@id/paint_chisel_tip_button"
             app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
         <com.redhoodhan.drawing.ui.common.StateImageButton
@@ -97,7 +97,7 @@
             android:background="?selectableItemBackgroundBorderless"
             android:src="?attr/icon_background"
             app:layout_constraintEnd_toEndOf="@id/draw_option_layout"
-            app:layout_constraintStart_toEndOf="@id/palette_button"
+            app:layout_constraintStart_toEndOf="@id/eraser_button"
             app:layout_constraintTop_toTopOf="@id/paint_solid_button" />
 
         <androidx.viewpager2.widget.ViewPager2

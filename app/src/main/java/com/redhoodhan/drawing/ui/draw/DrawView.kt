@@ -6,6 +6,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.View
 import com.redhoodhan.drawing.ui.draw.data.draw_option.BrushType
 import com.redhoodhan.drawing.ui.draw.data.draw_option.DrawPath
@@ -13,14 +14,19 @@ import com.redhoodhan.drawing.ui.draw.data.draw_option.LineType
 import com.redhoodhan.drawing.ui.draw.data.draw_option.PaintOption
 import com.redhoodhan.drawing.ui.draw.data.path_effect.LineDashPathEffect
 import com.redhoodhan.drawing.ui.draw.extension.drawWithBlendLayer
+import kotlin.math.abs
+import kotlin.math.log10
 
-
-private const val DEFAULT_TOUCH_TOLERANCE = 6f
-private const val DEFAULT_STROKE_WIDTH = 20f
+const val DEFAULT_MIN_STROKE_WIDTH = 3F
+const val DEFAULT_STROKE_WIDTH = 15F
 private const val DEFAULT_PAINT_COLOR = Color.BLACK
 private const val DEFAULT_CANVAS_COLOR = Color.WHITE
+private const val MAX_STROKE_WIDTH_BIAS = 5F
+private const val CHISEL_ALPHA = 80
+private const val MAX_ALPHA = 255
 
 private const val TAG = "DrawView"
+
 class DrawView @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet?,
@@ -37,7 +43,7 @@ class DrawView @JvmOverloads constructor(
     private var drawPath = DrawPath()
 
     // Paint options for the current draw
-    private var drawPaint = PaintOption()
+    private var drawPaintOption = PaintOption(Paint())
 
     // Coordinate x for the last move event
     private var curX = 0f
@@ -50,17 +56,11 @@ class DrawView @JvmOverloads constructor(
 
     private var isCanvasBackgroundChanged = false
 
-    private var prevCanvasBackgroundImgResId: Int = 0
-
     private var _lineType: LineType = LineType.SOLID
         set(value) {
             field = value
 
-            // Resets the corresponding brushType
-            brushType = value.getBrushType()
-
-            // Obtains corresponding pathEffect object
-            pathEffect = allocatePathEffect(pathEffect, _lineType, _brushSize)
+            modifyLineOptions(value)
         }
 
     private var brushType: BrushType = BrushType.NORMAL
@@ -68,7 +68,7 @@ class DrawView @JvmOverloads constructor(
     private var pathEffect: PathEffect? = null
         set(value) {
             field = value
-            drawPaint.pathEffect = value
+            drawPaintOption.paint.pathEffect = value
         }
 
     private var _isEraserOn = false
@@ -79,13 +79,17 @@ class DrawView @JvmOverloads constructor(
 
     private var _brushSize = DEFAULT_STROKE_WIDTH
         set(value) {
-            field = value
-            drawPaint.strokeWidth = value
-            // Checks if we need to retrieve the pathEffect that is size-variant
-            if (_lineType.isSizeVariant()) {
-                pathEffect = allocatePathEffect(pathEffect, _lineType, _brushSize)
+            field = if (value <= DEFAULT_MIN_STROKE_WIDTH) {
+                DEFAULT_MIN_STROKE_WIDTH
+            } else {
+                value
             }
+            updateBrushSize(_lineType, field)
         }
+
+    private var velocityTracker: VelocityTracker? = null
+
+    private var needsWidthBias: Boolean = false
 
     private var _drawState: DrawViewState? = null
         set(value) {
@@ -98,14 +102,7 @@ class DrawView @JvmOverloads constructor(
         }
 
     init {
-        drawPaint.apply {
-            color = DEFAULT_PAINT_COLOR
-            strokeWidth = DEFAULT_STROKE_WIDTH
-            isAntiAlias = true
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-        }
+        initDrawPaint()
 
         _drawState = DrawViewState()
     }
@@ -116,7 +113,7 @@ class DrawView @JvmOverloads constructor(
     var brushColor = DEFAULT_PAINT_COLOR
         set(value) {
             field = value
-            drawPaint.color = value
+            updateBrushColor(_lineType, value)
         }
 
     var lineType: LineType = _lineType
@@ -214,6 +211,20 @@ class DrawView @JvmOverloads constructor(
     }
 
     /**
+     * Initial setting of the default brush [BrushType.NORMAL], with line type [LineType.SOLID]
+     */
+    private fun initDrawPaint() {
+        drawPaintOption.paint.apply {
+            color = Color.BLACK
+            strokeWidth = DEFAULT_STROKE_WIDTH
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
+    }
+
+    /**
      * This function is called when the [DrawViewState.stateActionCallback] is triggered and triggers
      * the callbacks that passes the Boolean flag of corresponding state, by accessing the attribute
      * in the [DrawViewState].
@@ -249,6 +260,7 @@ class DrawView @JvmOverloads constructor(
         return when (lineType) {
             LineType.SOLID -> null
             LineType.DASH -> getDashEffectByBrushSize(pathEffect, brushSize)
+            else -> null
         }
     }
 
@@ -267,6 +279,90 @@ class DrawView @JvmOverloads constructor(
         return LineDashPathEffect(brushSize)
     }
 
+    private fun modifyLineOptions(lineType: LineType) {
+        // Resets the corresponding brushType
+        brushType = lineType.getBrushType()
+
+        // Obtains corresponding pathEffect object
+        pathEffect = allocatePathEffect(pathEffect, _lineType, _brushSize)
+
+        updateAlphaOption(lineType)
+
+        updateStrokeStyle(lineType)
+
+        updateVelocityTrackerStates(lineType)
+    }
+
+    /**
+     * This function is called to update flags that indicates whether certain drawing property
+     * correlates to the velocity of [MotionEvent.ACTION_MOVE].
+     *
+     * Note that If the current [lineType] is not velocity-invariant, then we clear the reference of
+     * the velocityTracker in case of the [VelocityTracker] object is not cleared when processing
+     * the [MotionEvent.ACTION_UP].
+     *
+     */
+    private fun updateVelocityTrackerStates(lineType: LineType) {
+        needsWidthBias = lineType.isVelocityVariant()
+
+        if (!needsWidthBias) {
+            clearVelocityTrackerRef()
+        }
+    }
+
+    /**
+     * This function is called when we switch the [lineType] and when we set brush color (note that
+     * setting color attribute will override alpha channel), to update the alpha value of the current
+     * [drawPaintOption].
+     */
+    private fun updateAlphaOption(lineType: LineType) {
+        drawPaintOption.paint.alpha = when (lineType) {
+            LineType.CHISEL -> CHISEL_ALPHA
+            else -> MAX_ALPHA
+        }
+    }
+
+    /**
+     * This function is called when we change the color of the drawing paint, to retrieve the alpha
+     * value overridden by [Paint.setColor] (which will be set to [MAX_ALPHA]).
+     */
+    private fun updateBrushColor(lineType: LineType, color: Int) {
+        drawPaintOption.paint.color = color
+
+        when (lineType) {
+            LineType.CHISEL -> {
+                updateAlphaOption(_lineType)
+            }
+            else -> Unit
+        }
+    }
+
+    private fun updateBrushSize(lineType: LineType, brushSize: Float) {
+        drawPaintOption.paint.strokeWidth = brushSize
+        // Checks if we need to retrieve the pathEffect that should be modified because of the
+        // size-invariant line type.
+        if (lineType.isSizeVariant()) {
+            pathEffect = allocatePathEffect(pathEffect, lineType, _brushSize)
+        }
+    }
+
+    private fun updateStrokeStyle(lineType: LineType) {
+        when (lineType) {
+            LineType.CHISEL -> {
+                drawPaintOption.paint.apply {
+                    strokeCap = Paint.Cap.SQUARE
+                    strokeJoin = Paint.Join.BEVEL
+                }
+            }
+            else -> {
+                drawPaintOption.paint.apply {
+                    strokeCap = Paint.Cap.ROUND
+                    strokeJoin = Paint.Join.ROUND
+                }
+            }
+        }
+    }
+
     /**
      * Note that the eraser mode is really just a NORMAL and SOLID brush with its XferMode set to
      * [PorterDuff.Mode.CLEAR], so that we can keep track of the drawing paths of the eraser without
@@ -277,9 +373,9 @@ class DrawView @JvmOverloads constructor(
             brushType = BrushType.NORMAL
             _lineType = LineType.SOLID
 
-            drawPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+            drawPaintOption.paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         } else {
-            drawPaint.xfermode = null
+            drawPaintOption.paint.xfermode = null
         }
     }
 
@@ -312,7 +408,6 @@ class DrawView @JvmOverloads constructor(
                 canvasBackgroundImg?.let {
                     setBackgroundResource(it)
                 }
-                Log.e(TAG, "setBackground: ImgBackground")
                 isCanvasBackgroundChanged = false
             }
         } else {
@@ -324,7 +419,14 @@ class DrawView @JvmOverloads constructor(
     }
 
     private fun drawCurrent(canvas: Canvas) {
-        canvas.drawPath(drawPath, drawPaint)
+//        if (needsWidthBias) {
+//            drawPaintOption.paint.strokeWidth += drawPaintOption.strokeWidthBias
+//        }
+        canvas.drawPath(drawPath, drawPaintOption.paint)
+
+//        if (needsWidthBias) {
+//            drawPaintOption.paint.strokeWidth -= drawPaintOption.strokeWidthBias
+//        }
     }
 
     private fun drawPrevious(canvas: Canvas) {
@@ -345,6 +447,11 @@ class DrawView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val touchX = event.x
         val touchY = event.y
+
+        if (velocityTracker == null && needsWidthBias) {
+            velocityTracker = VelocityTracker.obtain()
+        }
+        velocityTracker?.addMovement(event)
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -385,6 +492,7 @@ class DrawView @JvmOverloads constructor(
      * Note that this function is called when [MotionEvent.ACTION_MOVE] is intercepted.
      */
     private fun performActionMove(touchX: Float, touchY: Float) {
+        // TODO: when implementing pen effect, we can use other path linking techniques, like moveTo
         drawPath.quadTo(
             curX,
             curY,
@@ -394,26 +502,68 @@ class DrawView @JvmOverloads constructor(
         // Updates the coordinates of the last move
         curX = touchX
         curY = touchY
+
+        // Computes the velocity of moving event based on time unit of 1000ms and calculates the
+        // bias.
+        velocityTracker?.let {
+            it.computeCurrentVelocity(1000)
+            drawPaintOption.strokeWidthBias = obtainBiasByVelocity(it.xVelocity, it.yVelocity)
+        }
     }
 
     /**
-     * Adds the [drawPath] and the [drawPaint] to the stored lists respectively when the current
+     * Generates bias value of stroke width to simulate "Signing Pen" effect.
+     *
+     * Note that the minimum value of the bias is 0, which corresponds to zero velocity. If we do not
+     * set any upper bound limit, the maximum value of the bias will be log10([Float.MAX_VALUE]),
+     * which is equal to 38.5318394234 and literally not suitable for drawing as signing pen.
+     *
+     * Thus, we set the maximum bias value as [MAX_STROKE_WIDTH_BIAS].
+     */
+    private fun obtainBiasByVelocity(
+        velocityX: Float,
+        velocityY: Float,
+        max: Float = MAX_STROKE_WIDTH_BIAS
+    ): Float {
+        log10(1F + abs(velocityX.coerceAtLeast(velocityY))).also {
+            return if (it >= max) {
+                max
+            } else {
+                it
+            }
+        }
+    }
+
+    /**
+     * Adds the [drawPath] and the [drawPaintOption] to the stored lists respectively when the current
      * drawing process is ended.
      *
-     * The lists will be used to retrieve the previous [drawPath] and the [drawPaint] when the
+     * The lists will be used to retrieve the previous [drawPath] and the [drawPaintOption] when the
      * function [drawPrevious] is called.
      *
      * Note that this function is called when [MotionEvent.ACTION_UP] is intercepted.
      */
     private fun performActionUp() {
-        drawStateRef.addToPrev(drawPath, Paint(drawPaint) )
+        drawStateRef.addToPrev(drawPath, drawPaintOption.paint)
 
         // Prepares for next draw. Also prevents the drawCurrent function from drawing the same
         // path again and again when the onDraw function is called.
         drawPath = DrawPath()
+
+        drawPaintOption = PaintOption(Paint(drawPaintOption.paint))
+
+        clearVelocityTrackerRef()
     }
 
-
+    /**
+     * Releases the VelocityTracker reference and returns the object back.
+     */
+    private fun clearVelocityTrackerRef() {
+        velocityTracker?.let {
+            it.recycle()
+            velocityTracker = null
+        }
+    }
 
 
 }

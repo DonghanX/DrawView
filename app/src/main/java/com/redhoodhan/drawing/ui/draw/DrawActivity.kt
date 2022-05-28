@@ -2,7 +2,6 @@ package com.redhoodhan.drawing.ui.draw
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
@@ -66,7 +65,10 @@ class MainActivity : AppCompatActivity() {
         binding.paintSolidButton.isClicked = true
 
         // Initialize the id of the default clicked StateButton
-        viewModel.lastClickedStateButtonId = binding.paintSolidButton.id
+        binding.paintSolidButton.id.let {
+            viewModel.curClickedStateButtonId = it
+            viewModel.storedClickedStateButtonId = it
+        }
 
         doubleClickExceptionButtonList.add(binding.backgroundButton)
     }
@@ -87,11 +89,15 @@ class MainActivity : AppCompatActivity() {
                 toggleEraser()
             }
 
-            paletteButton.setOnStateClickListener(false) {
-                // TODO
+            paintChiselTipButton.setOnStateClickListener(true) {
+                switchFragmentInPager(POSITION_DRAW_OPTION_FRAGMENT)
+                switchToLineType(LineType.CHISEL)
             }
 
-            backgroundButton.setOnStateClickListener(true) {
+            backgroundButton.setOnStateClickListener(
+                needsPerformWithPanel = true,
+                needsStoreButtonId = false
+            ) {
                 switchFragmentInPager(POSITION_DRAW_BACKGROUND_FRAGMENT)
             }
 
@@ -116,15 +122,14 @@ class MainActivity : AppCompatActivity() {
         binding.drawView.apply {
             drawViewPressCallback = {
                 hideDrawOptionPanel()
+                refreshDrawButtonStateByMode()
             }
 
             undoStateCallback = { isAvailable ->
-                Log.e(TAG, "undoStateCallback: $isAvailable")
                 binding.undoButton.isClicked = isAvailable
             }
 
             redoStateCallback = { isAvailable ->
-                Log.e(TAG, "redoStateCallback: $isAvailable")
                 binding.redoButton.isClicked = isAvailable
             }
         }
@@ -188,9 +193,11 @@ class MainActivity : AppCompatActivity() {
      * Wrapper of the [View.OnClickListener] to extract common operations when clicking the
      * [StateImageButton] on the draw-options layout and leaves a callback [clickCallback] for each
      * [StateImageButton] to perform its own click event.
+     *
      */
     private fun StateImageButton.setOnStateClickListener(
         needsPerformWithPanel: Boolean,
+        needsStoreButtonId: Boolean = true,
         clickCallback: (View) -> Unit
     ) {
         // Adds the current state button to a general list for a easier retrieving and iterating.
@@ -201,8 +208,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         setOnClickListener {
-            viewModel.lastClickedStateButtonId = it.id
+            viewModel.curClickedStateButtonId = it.id
             refreshAllButtonState(id)
+
+            // If stored, the button ID could be retrieved for calling refreshDrawButtonStateByMode
+            if (needsStoreButtonId) {
+                viewModel.storedClickedStateButtonId = id
+            }
 
             // TODO: Refactor the if-else logic
             if (needsPerformWithPanel && viewModel.isStateButtonDoubleClicked) {
@@ -219,6 +231,25 @@ class MainActivity : AppCompatActivity() {
 
             // Callback that performs the actual click event logic
             clickCallback.invoke(this)
+        }
+    }
+
+    /**
+     * This function is called when user has clicked the buttons that has nothing to do with the
+     * paint option and paths and only affects the canvas, i.e., the background button, and then
+     * press the [DrawView] directly without clicking other button on the draw option panel.
+     *
+     * By calling this function, we retrieve the state button ID by accessing to the ???
+     * we are using and then retrieve the button by ID. Then
+     * set the button we retrieved as the clicked one.
+     */
+    private fun refreshDrawButtonStateByMode() {
+        // TODO: abstraction is needed
+        when (viewModel.curClickedStateButtonId) {
+            binding.backgroundButton.id -> {
+                refreshAllButtonState(viewModel.storedClickedStateButtonId)
+            }
+            else -> {}
         }
     }
 
@@ -270,11 +301,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun toggleEraser() {
         binding.drawView.isEraserOn = true
-    }
-
-    override fun onDestroy() {
-        binding.drawView.clearCallback()
-
-        super.onDestroy()
     }
 }

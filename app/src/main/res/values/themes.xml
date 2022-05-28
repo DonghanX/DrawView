@@ -20,5 +20,6 @@
         <item name="icon_background">@drawable/icon_background</item>
         <item name="icon_solid_line">@drawable/icon_solid_line</item>
         <item name="icon_dashed_line">@drawable/icon_dashed_line</item>
+        <item name="icon_chisel_tip">@drawable/icon_chisel_tip</item>
     </style>
 </resources>

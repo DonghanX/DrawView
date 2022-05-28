@@ -2,6 +2,7 @@
 <resources>
     <attr name="icon_paint_solid" format="reference" />
     <attr name="icon_paint_dashed" format="reference" />
+    <attr name="icon_chisel_tip" format="reference" />
     <attr name="icon_eraser" format="reference" />
     <attr name="icon_palette" format="reference" />
     <attr name="icon_background" format="reference" />
