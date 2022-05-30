@@ -52,8 +52,7 @@ dependencies {
 #### (Optional) Implement the callbacks
 > Note that this step  is optional, because the callbacks are invoked using the safe call.
 * `drawViewPressCallback`: Invoked when you press the `DrawView`.
-* `undoStateCallback`: Invoked when the content in the `DrawView` changes. The given receiver parameter returns true if Undo action is available after the change.
-* `redoStateCallback`: Invoked when the content in the `DrawView` changes. The given receiver parameter returns true if Redo action is available after the change.
+* `undoStateCallback` / `redoStateCallback`: Invoked when the content in the `DrawView` changes. The given receiver parameter returns true if Undo / Redo action is available after the change.
 ```Kotlin
 binding.drawView.apply {
     drawViewPressCallback = {
