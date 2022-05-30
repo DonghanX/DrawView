@@ -8,7 +8,16 @@ A simple Android view for drawing.
 
 #### Step 1. Add the JitPack repository to your build file
 
-Add it in your root build.gradle at the end of repositories:
+>If you are using Gradle 6.8 or higher version, add it in your root setting.gradle at the end of repositories:
+```gradle
+dependencyResolutionManagement {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+> If not, add it in your root build.gradle at the end of repositories:
 ```gradle
 allprojects {
     repositories {
@@ -20,7 +29,7 @@ allprojects {
 #### Step 2. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.DonghanX:Drawing:1.0.0'
+    implementation 'com.github.DonghanX:Draw:v1.0.0'
 }
 ```
 
