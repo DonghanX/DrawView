@@ -2,7 +2,7 @@ package com.redhoodhan.drawing.ui.draw
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.redhoodhan.drawing.ui.draw.data.DrawRepository
+import com.redhoodhan.drawing.ui.draw.DrawRepository
 import kotlin.properties.Delegates
 
 class DrawViewModel : ViewModel() {
@@ -34,10 +34,14 @@ class DrawViewModel : ViewModel() {
     val backgroundImgResLiveData: MutableLiveData<Int> = MutableLiveData()
 
     /**
-     * LiveData that stores the brush size in Float to the selected item in the recycler view in the
-     * [DrawOptionFragment].
+     * LiveData that stores the brush size in Float corresponding to the seekbar in the
+     * [DrawEraserFragment].
      */
     val drawBrushSizeLiveData: MutableLiveData<Float> = MutableLiveData()
+
+    val drawEraserSizeLiveData: MutableLiveData<Float> = MutableLiveData()
+
+    val clearCanvasLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     var storedClickedStateButtonId: Int = 0
 
@@ -56,10 +60,22 @@ class DrawViewModel : ViewModel() {
     val backgroundList: List<Int>?
         get() = mRepo?.backgroundList
 
-    var defaultBrushSize: Float = DEFAULT_STROKE_WIDTH
+    var defaultBrushSize: Float = com.redhoodhan.draw.DEFAULT_STROKE_WIDTH
 
-    fun changeBrushSizeFromSeekBarProgress(progress: Int, maxProgress: Int = 50) {
-        drawBrushSizeLiveData.postValue(progress.toFloat())
+    fun notifyChangeBrushSize(
+        progress: Int,
+        maxProgress: Int = 50,
+        isFromEraser: Boolean = false
+    ) {
+        if (isFromEraser) {
+            drawEraserSizeLiveData.postValue(progress.toFloat())
+        } else {
+            drawBrushSizeLiveData.postValue(progress.toFloat())
+        }
+    }
+
+    fun notifyClearCanvas(needsSaving: Boolean = true) {
+        clearCanvasLiveData.postValue(needsSaving)
     }
 
     override fun onCleared() {

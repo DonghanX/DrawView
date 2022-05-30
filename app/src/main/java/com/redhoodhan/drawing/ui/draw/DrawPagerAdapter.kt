@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-private const val TOTAL_FRAGMENT_NUM = 2
+private const val TOTAL_FRAGMENT_NUM = 3
 private const val TAG = "DrawPagerAdapter"
 
 class DrawPagerAdapter(fragmentActivity: FragmentActivity) :
@@ -22,10 +22,10 @@ class DrawPagerAdapter(fragmentActivity: FragmentActivity) :
      * equaling to 1 corresponds to [DrawBackgroundFragment]
      */
     override fun createFragment(position: Int): Fragment {
-        Log.e(TAG, "createFragmentPos: $position")
         return when (position) {
             0 -> DrawOptionFragment.newInstance()
             1 -> DrawBackgroundFragment.newInstance()
+            2 -> DrawEraserFragment.newInstance()
             else -> DrawOptionFragment.newInstance()
         }
     }

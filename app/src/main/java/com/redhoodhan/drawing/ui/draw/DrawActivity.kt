@@ -1,21 +1,25 @@
 package com.redhoodhan.drawing.ui.draw
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.viewpager2.widget.ViewPager2
+import com.redhoodhan.draw.DrawView
+import com.redhoodhan.draw.data.draw_option.LineType
 import com.redhoodhan.drawing.R
 import com.redhoodhan.drawing.databinding.ActivityMainBinding
 import com.redhoodhan.drawing.ui.common.StateImageButton
-import com.redhoodhan.drawing.ui.draw.data.draw_option.LineType
 import com.redhoodhan.drawing.util.AnimationUtil
+
 
 private const val TAG = "MainActivity"
 
 private const val POSITION_DRAW_OPTION_FRAGMENT = 0
 private const val POSITION_DRAW_BACKGROUND_FRAGMENT = 1
+private const val POSITION_DRAW_ERASER_FRAGMENT = 2
 
 class MainActivity : AppCompatActivity() {
 
@@ -85,7 +89,8 @@ class MainActivity : AppCompatActivity() {
                 switchToLineType(LineType.DASH)
             }
 
-            eraserButton.setOnStateClickListener(false) {
+            eraserButton.setOnStateClickListener(true) {
+                switchFragmentInPager(POSITION_DRAW_ERASER_FRAGMENT)
                 toggleEraser()
             }
 
@@ -108,7 +113,6 @@ class MainActivity : AppCompatActivity() {
             redoButton.setOnClickListener {
                 drawView.redo()
             }
-
         }
     }
 
@@ -145,12 +149,20 @@ class MainActivity : AppCompatActivity() {
                 onBrushSizeChanged(brushSize)
             }
 
+            it.drawEraserSizeLiveData.observe(this) { eraserSize ->
+                onBrushSizeChanged(eraserSize, true)
+            }
+
             it.backgroundColorLiveData.observe(this) { colorId ->
                 onBackgroundColorChanged(colorId)
             }
 
             it.backgroundImgResLiveData.observe(this) { imgResId ->
                 onBackgroundImgResChanged(imgResId)
+            }
+
+            it.clearCanvasLiveData.observe(this) { needsSaving ->
+                onCanvasCleared(needsSaving)
             }
         }
     }
@@ -172,8 +184,13 @@ class MainActivity : AppCompatActivity() {
         binding.drawView.brushColor = ResourcesCompat.getColor(resources, colorResId, null)
     }
 
-    private fun onBrushSizeChanged(brushSize: Float) {
-        binding.drawView.brushSize = brushSize
+    private fun onBrushSizeChanged(size: Float, isFromEraser: Boolean = false) {
+        if (isFromEraser) {
+            Log.e(TAG, "onBrushSizeChanged: eraser size is:$size")
+            binding.drawView.eraserSize = size
+        } else {
+            binding.drawView.brushSize = size
+        }
     }
 
     private fun onBackgroundColorChanged(colorResId: Int) {
@@ -183,6 +200,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun onBackgroundImgResChanged(imgResId: Int) {
         binding.drawView.canvasBackgroundImg = imgResId
+    }
+
+    private fun onCanvasCleared(needsSaving: Boolean) {
+        binding.drawView.clearCanvas(needsSaving)
     }
 
     private fun initDefaultDrawOptions() {
@@ -218,7 +239,7 @@ class MainActivity : AppCompatActivity() {
 
             // TODO: Refactor the if-else logic
             if (needsPerformWithPanel && viewModel.isStateButtonDoubleClicked) {
-                performWithDrawOptionPanel(it)
+                performWithDrawOptionPanel()
             } else if (!invokeFragmentButtonList.contains(this)) {
                 // If the new clicked state button should also perform with the draw option panel,
                 // then we do not hide the fragment container. We just switch the original fragment
@@ -253,7 +274,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun performWithDrawOptionPanel(view: View) {
+    private fun performWithDrawOptionPanel() {
         val curTranslationY = binding.drawOptionLayout.translationY
 
         AnimationUtil.repTranslateY(

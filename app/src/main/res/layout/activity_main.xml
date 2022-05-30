@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.draw.MainActivity">
 
-    <com.redhoodhan.drawing.ui.draw.DrawView
+    <com.redhoodhan.draw.DrawView
         android:id="@+id/draw_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

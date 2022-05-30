@@ -104,7 +104,7 @@ class DrawOptionFragment : Fragment() {
         binding.brushSizeSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean) {
-                viewModel.changeBrushSizeFromSeekBarProgress(progress)
+                viewModel.notifyChangeBrushSize(progress)
             }
 
             override fun onStartTrackingTouch(seekbar: SeekBar?) {
