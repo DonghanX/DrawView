@@ -1,4 +1,4 @@
-# Drawing [![](https://jitpack.io/v/DonghanX/Drawing.svg)](https://jitpack.io/#DonghanX/Drawing)
+# Draw [![](https://jitpack.io/v/DonghanX/Drawing.svg)](https://jitpack.io/#DonghanX/Drawing)
 
 A simple Android view for drawing.
 
