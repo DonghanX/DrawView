@@ -11,6 +11,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.redhoodhan.drawing.R
 
 private const val TAG = "StateImageButton"
+
 class StateImageButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet?,
@@ -18,7 +19,7 @@ class StateImageButton @JvmOverloads constructor(
 ) : AppCompatImageButton(context, attributeSet, defStyle) {
 
     private var originalColorResId: Int = R.color.black
-    private var clickedColorResId: Int = R.color.blue
+    private var clickedColorResId: Int = R.color.purple_500
 
     private val originalColor: Int by lazy {
         retrieveColorFromRes(originalColorResId)
@@ -45,7 +46,10 @@ class StateImageButton @JvmOverloads constructor(
                     originalColorResId =
                         getResourceId(R.styleable.StateImageButton_originalColor, R.color.black)
                     clickedColorResId =
-                        getResourceId(R.styleable.StateImageButton_selectedColor, R.color.blue)
+                        getResourceId(
+                            R.styleable.StateImageButton_selectedColor,
+                            R.color.purple_500
+                        )
                 } finally {
                     recycle()
                 }
