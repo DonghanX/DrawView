@@ -49,7 +49,7 @@ afterEvaluate {
                 from components.release
 
                 groupId = 'com.github.DonghanX'
-                artifactId = 'Drawing'
+                artifactId = 'Draw'
                 version = '1.0.0'
             }
         }
