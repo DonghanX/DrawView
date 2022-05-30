@@ -138,7 +138,7 @@ binding.drawView.brushSize = 10F
 ```kotlin
 binding.drawView.eraserSize = 10F
 ```
-> Note that `brushSize` receives a single float value.  
+> Note that `eraserSize` receives a single float value.  
 > Also note that the minimum stroke width is set to 3F.
 
 #### Save the canvas as Bitmap
