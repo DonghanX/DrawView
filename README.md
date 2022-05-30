@@ -1,4 +1,4 @@
-# Draw [![](https://jitpack.io/v/DonghanX/Drawing.svg)](https://jitpack.io/#DonghanX/Drawing)
+# Draw [![](https://jitpack.io/v/DonghanX/Draw.svg)](https://jitpack.io/#DonghanX/Draw)
 
 A simple Android view for drawing.
 
@@ -29,7 +29,7 @@ allprojects {
 #### Step 2. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.DonghanX:Draw:v1.0.0'
+    implementation 'com.github.DonghanX:Draw:v1.0.1'
 }
 ```
 
