@@ -114,6 +114,8 @@ class DrawViewState {
         prevDrawPaint.clear()
         undoneDrawPath.clear()
         undoneDrawPaint.clear()
+
+        stateActionCallback?.invoke()
     }
 
     fun clearCallback() {

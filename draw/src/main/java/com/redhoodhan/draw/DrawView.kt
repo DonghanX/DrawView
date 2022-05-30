@@ -319,6 +319,9 @@ class DrawView @JvmOverloads constructor(
 
     private fun modifyLineOptions(lineType: LineType) {
         if (lineType == LineType.ERASER) {
+            if (!_isEraserOn) {
+                _isEraserOn = true
+            }
             return
         }
 
@@ -431,7 +434,9 @@ class DrawView @JvmOverloads constructor(
 
         if (isEraserOn) {
             brushType = BrushType.NORMAL
-            _lineType = LineType.ERASER
+            if (_lineType != LineType.ERASER) {
+                _lineType = LineType.ERASER
+            }
 
             drawPaintOption.paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         } else {

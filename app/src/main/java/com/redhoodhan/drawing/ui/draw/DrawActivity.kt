@@ -1,5 +1,6 @@
 package com.redhoodhan.drawing.ui.draw
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -186,7 +187,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun onBrushSizeChanged(size: Float, isFromEraser: Boolean = false) {
         if (isFromEraser) {
-            Log.e(TAG, "onBrushSizeChanged: eraser size is:$size")
             binding.drawView.eraserSize = size
         } else {
             binding.drawView.brushSize = size
