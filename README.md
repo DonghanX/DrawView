@@ -8,7 +8,7 @@ A simple Android view for drawing.
 
 #### Step 1. Add the JitPack repository to your build file
 
->If you are using Gradle 6.8 or higher version, add it in `setting.gradle` at the end of repositories:
+If you are using Gradle 6.8 or higher version, add it in `setting.gradle` at the end of repositories:
 ```gradle
 dependencyResolutionManagement {
     repositories {
@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 }
 ```
 
-> If not, add it in your root `build.gradle` at the end of repositories:
+If not, add it in your root `build.gradle` at the end of repositories:
 ```gradle
 allprojects {
     repositories {
