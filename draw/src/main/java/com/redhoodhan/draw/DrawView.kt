@@ -205,11 +205,11 @@ class DrawView @JvmOverloads constructor(
      * instead of erasing our previous work. Thus, the eraser mode should be switched off first to
      * reset XferMode of the corresponding [Paint].
      */
-    fun switchBrushType(brushType: BrushType) {
-        _isEraserOn = false
-        // TODO: Complete BrushType switching logic
-        //      Note that this should be done after the actual drawing function is completed
-    }
+//    fun switchBrushType(brushType: BrushType) {
+//        _isEraserOn = false
+//        // TODO: Complete BrushType switching logic
+//        //      Note that this should be done after the actual drawing function is completed
+//    }
 
     fun undo() {
         drawStateRef.undo()
@@ -240,6 +240,7 @@ class DrawView @JvmOverloads constructor(
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         Canvas(bitmap).also {
+
             draw(it)
         }
 
@@ -512,6 +513,13 @@ class DrawView @JvmOverloads constructor(
             velocityTracker = VelocityTracker.obtain()
         }
         velocityTracker?.addMovement(event)
+
+//        // Double Buffer
+//        if (bufferBitmap == null) {
+//            bufferBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also {
+//                bufferCanvas = Canvas(it)
+//            }
+//        }
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {

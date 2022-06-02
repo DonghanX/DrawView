@@ -19,6 +19,9 @@ class DrawViewState {
     val prevSize: Int
         get() = prevDrawPath.size
 
+    val isPathEmpty: Boolean
+        get() = (prevSize == 0)
+
     /**
      * Returns the size of [undoneDrawPath]. This is used to check if we can perform any redo
      * action.

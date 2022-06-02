@@ -8,10 +8,9 @@ import android.graphics.Canvas
  *
  * [performDraw] is the callback lambda function to perform the actual drawing process.
  */
-fun Canvas.drawWithBlendLayer(
+inline fun Canvas.drawWithBlendLayer(
     performDraw: (Canvas) -> Unit,
 ) {
-
     val count = saveLayer(
         0F, 0F,
         width.toFloat(), height.toFloat(), null
