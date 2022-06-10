@@ -74,7 +74,7 @@ binding.drawView.lineType = LineType.SOLID
 ```
 `LineType` is utilized by `DrawView` to modify the path properties and paint options, such as `StrokeStyle`, `Alpha` and `PathEffect`.
 
-The `LineType` enum value and its description is as follows:
+The `LineType` enum value and its description are as follows:
 | LineType | Description |
 | :----: | :----: |
 | LineType.SOLID | Solid line |
