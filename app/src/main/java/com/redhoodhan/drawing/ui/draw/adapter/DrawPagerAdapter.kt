@@ -1,9 +1,11 @@
-package com.redhoodhan.drawing.ui.draw
+package com.redhoodhan.drawing.ui.draw.adapter
 
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.redhoodhan.drawing.ui.draw.DrawBackgroundFragment
+import com.redhoodhan.drawing.ui.draw.DrawEraserFragment
+import com.redhoodhan.drawing.ui.draw.DrawOptionFragment
 
 private const val TOTAL_FRAGMENT_NUM = 3
 private const val TAG = "DrawPagerAdapter"

@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.redhoodhan.drawing.databinding.FragmentDrawBackgroundBinding
+import com.redhoodhan.drawing.ui.draw.adapter.DrawColorResAdapter
+import com.redhoodhan.drawing.ui.draw.adapter.DrawImgResAdapter
 
 private const val TAG = "DrawOptionFragment"
 

@@ -12,6 +12,7 @@ import androidx.core.graphics.BlendModeCompat
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.redhoodhan.drawing.databinding.FragmentDrawOptionBinding
+import com.redhoodhan.drawing.ui.draw.adapter.DrawColorResAdapter
 
 private const val TAG = "DrawOptionFragment"
 
@@ -104,13 +105,16 @@ class DrawOptionFragment : Fragment() {
         binding.brushSizeSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean) {
-                viewModel.notifyChangeBrushSize(progress)
             }
 
             override fun onStartTrackingTouch(seekbar: SeekBar?) {
+
             }
 
             override fun onStopTrackingTouch(seekbar: SeekBar?) {
+                seekbar?.let {
+                    viewModel.notifyChangeBrushSize(it.progress)
+                }
             }
         })
     }

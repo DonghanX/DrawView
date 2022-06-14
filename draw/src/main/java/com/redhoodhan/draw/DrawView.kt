@@ -4,28 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
-import com.redhoodhan.draw.data.draw_option.BrushType
-import com.redhoodhan.draw.data.draw_option.DrawPath
-import com.redhoodhan.draw.data.draw_option.LineType
-import com.redhoodhan.draw.data.draw_option.PaintOption
-import com.redhoodhan.draw.data.path_effect.LineDashPathEffect
+import com.redhoodhan.draw.draw_option.DrawOptionContext
+import com.redhoodhan.draw.draw_option.data.*
 import com.redhoodhan.draw.extension.drawWithBlendLayer
 import kotlin.math.abs
 import kotlin.math.log10
 
-const val DEFAULT_MIN_STROKE_WIDTH = 3F
-const val DEFAULT_STROKE_WIDTH = 15F
-private const val DEFAULT_PAINT_COLOR = Color.BLACK
-private const val DEFAULT_CANVAS_COLOR = Color.WHITE
-private const val MAX_STROKE_WIDTH_BIAS = 5F
-private const val CHISEL_ALPHA = 80
-private const val MAX_ALPHA = 255
-
-private const val TAG = "DrawView"
 
 class DrawView @JvmOverloads constructor(
     context: Context,
@@ -38,6 +25,8 @@ class DrawView @JvmOverloads constructor(
 //
 //    // Double buffering bitmap
 //    private var bufferBitmap: Bitmap? = null
+
+    private var drawOptionContext: DrawOptionContext
 
     // Path of the current draw
     private var drawPath = DrawPath()
@@ -58,45 +47,34 @@ class DrawView @JvmOverloads constructor(
 
     private var _lineType: LineType = LineType.SOLID
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
-
             modifyLineOptions(value)
         }
 
     private var brushType: BrushType = BrushType.NORMAL
 
-    private var pathEffect: PathEffect? = null
+    private var _brushSize = DrawConst.DEFAULT_STROKE_WIDTH
         set(value) {
-            field = value
-            drawPaintOption.paint.pathEffect = value
-        }
-
-    private var _isEraserOn = false
-        set(value) {
-            field = value
-            toggleEraser(value)
-        }
-
-    private var _brushSize = DEFAULT_STROKE_WIDTH
-        set(value) {
-            field = if (value <= DEFAULT_MIN_STROKE_WIDTH) {
-                DEFAULT_MIN_STROKE_WIDTH
+            field = if (value <= DrawConst.DEFAULT_MIN_STROKE_WIDTH) {
+                DrawConst.DEFAULT_MIN_STROKE_WIDTH
             } else {
                 value
             }
             changeStrokeWidthSrc(false)
-            updatePathEffect(_lineType)
+            updatePathEffect()
         }
 
-    private var _eraserSize = DEFAULT_STROKE_WIDTH
+    private var _eraserSize = DrawConst.DEFAULT_STROKE_WIDTH
         set(value) {
-            field = if (value <= DEFAULT_MIN_STROKE_WIDTH) {
-                DEFAULT_MIN_STROKE_WIDTH
+            field = if (value <= DrawConst.DEFAULT_MIN_STROKE_WIDTH) {
+                DrawConst.DEFAULT_MIN_STROKE_WIDTH
             } else {
                 value
             }
             changeStrokeWidthSrc(true)
-            Log.e(TAG, "eraserSizeSetterPerform:$value ")
         }
 
     private var velocityTracker: VelocityTracker? = null
@@ -116,16 +94,17 @@ class DrawView @JvmOverloads constructor(
     init {
         initDrawPaint()
 
+        drawOptionContext = DrawOptionContext()
         _drawState = DrawViewState()
     }
 
     val drawStateRef
         get() = _drawState!!
 
-    var brushColor = DEFAULT_PAINT_COLOR
+    var brushColor = DrawConst.DEFAULT_PAINT_COLOR
         set(value) {
             field = value
-            updateBrushColor(_lineType, value)
+            updateBrushColor(value)
         }
 
     var lineType: LineType = _lineType
@@ -149,17 +128,10 @@ class DrawView @JvmOverloads constructor(
         }
         get() = _eraserSize
 
-    var isEraserOn = _isEraserOn
-        set(value) {
-            field = value
-            _isEraserOn = value
-        }
-        get() = _isEraserOn
-
     /**
      * Color resource of the drawing canvas background
      */
-    var canvasBackgroundColor = DEFAULT_CANVAS_COLOR
+    var canvasBackgroundColor = DrawConst.DEFAULT_CANVAS_COLOR
         set(value) {
             field = value
             isCanvasBackgroundChanged = true
@@ -261,7 +233,7 @@ class DrawView @JvmOverloads constructor(
     private fun initDrawPaint() {
         drawPaintOption.paint.apply {
             color = Color.BLACK
-            strokeWidth = DEFAULT_STROKE_WIDTH
+            strokeWidth = DrawConst.DEFAULT_STROKE_WIDTH
             isAntiAlias = true
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
@@ -284,59 +256,17 @@ class DrawView @JvmOverloads constructor(
         redoStateCallback?.invoke(drawStateRef.isRedoAvailable)
     }
 
-    /**
-     * Allocates an existing pathEffect or generates a new pathEffect to assign to [pathEffect]
-     * property. [lineType] is utilized to determine which type of pathEffect is needed. [brushSize]
-     * serves to recalculate certain properties, like the phase and intervals between lines of
-     * [DashPathEffect], so that the final outcome won't be too strange when the [brushSize] is
-     * too large.
-     */
-    private fun allocatePathEffect(
-        pathEffect: PathEffect?,
-        lineType: LineType,
-        brushSize: Float
-    ): PathEffect? {
-        return when (lineType) {
-            LineType.SOLID -> null
-            LineType.DASH -> getDashEffectByBrushSize(pathEffect, brushSize)
-            else -> null
-        }
-    }
-
-    private fun getDashEffectByBrushSize(
-        pathEffect: PathEffect?,
-        brushSize: Float
-    ): LineDashPathEffect {
-        // Avoids unnecessary creation of DashPathEffect objects by checking if the brushSize
-        // remains the same
-        pathEffect?.let {
-            if (it is LineDashPathEffect && it.brushSize == brushSize) {
-                return it
-            }
-        }
-
-        return LineDashPathEffect(brushSize)
-    }
-
     private fun modifyLineOptions(lineType: LineType) {
-        if (lineType == LineType.ERASER) {
-            if (!_isEraserOn) {
-                _isEraserOn = true
-            }
-            return
-        }
-
-        _isEraserOn = false
+        val isEraserOn = lineType == LineType.ERASER
+        val curSize = changeStrokeWidthSrc(isEraserOn)
 
         // Resets the corresponding brushType
         brushType = lineType.getBrushType()
 
-        // Obtains corresponding pathEffect object
-        pathEffect = allocatePathEffect(pathEffect, _lineType, _brushSize)
-
-        updateAlphaOption(lineType)
-
-        updateStrokeStyle(lineType)
+        drawOptionContext.let {
+            it.changeStrategyByLineType(lineType)
+            it.updateOptionWhenSwitchingLineType(drawPaintOption, curSize)
+        }
 
         updateVelocityTrackerStates(lineType)
     }
@@ -358,99 +288,37 @@ class DrawView @JvmOverloads constructor(
         }
     }
 
-    /**
-     * This function is called when we switch the [lineType] and when we set brush color (note that
-     * setting color attribute will override alpha channel), to update the alpha value of the current
-     * [drawPaintOption].
-     */
-    private fun updateAlphaOption(lineType: LineType) {
-        drawPaintOption.paint.alpha = when (lineType) {
-            LineType.CHISEL -> CHISEL_ALPHA
-            else -> MAX_ALPHA
-        }
+    private fun updateBrushColor(color: Int) {
+        drawOptionContext.updateBrushColor(drawPaintOption, color)
+    }
+
+    private fun updatePathEffect() {
+        drawOptionContext.updatePathEffect(drawPaintOption, brushSize)
     }
 
     /**
-     * This function is called when we change the color of the drawing paint, to retrieve the alpha
-     * value overridden by [Paint.setColor] (which will be set to [MAX_ALPHA]).
-     */
-    private fun updateBrushColor(lineType: LineType, color: Int) {
-        drawPaintOption.paint.color = color
-
-        when (lineType) {
-            LineType.CHISEL -> {
-                updateAlphaOption(_lineType)
-            }
-            else -> Unit
-        }
-    }
-
-    private fun updatePathEffect(lineType: LineType = LineType.SOLID) {
-        // Checks if we need to retrieve the pathEffect that should be modified because of the
-        // size-invariant line type.
-        if (lineType.isSizeVariant()) {
-            pathEffect = allocatePathEffect(pathEffect, lineType, _brushSize)
-        }
-    }
-
-    /**
-     * This function is called to change the brush size according to whether the eraser is turned on.
-     *
+     * This function is called to change the brush size source according to whether the eraser is
+     * turned on.
      * Note that the brush size of eraser is individually independent.
      */
-    private fun changeStrokeWidthSrc(isEraserOn: Boolean) {
-        drawPaintOption.paint.strokeWidth = if (isEraserOn) {
-            Log.e(TAG, "changeStrokeWidthSrc: set Erasersize: $_eraserSize")
-            _eraserSize
+    private fun changeStrokeWidthSrc(isEraserOn: Boolean): Float {
+        val curSize = if (isEraserOn) {
+            eraserSize
         } else {
-            _brushSize
+            brushSize
         }
 
+        drawOptionContext.updateBrushSize(drawPaintOption, curSize)
+
+        return curSize
     }
 
-    private fun updateStrokeStyle(lineType: LineType) {
-        when (lineType) {
-            LineType.CHISEL -> {
-                drawPaintOption.paint.apply {
-                    strokeCap = Paint.Cap.SQUARE
-                    strokeJoin = Paint.Join.BEVEL
-                }
-            }
-            else -> {
-                drawPaintOption.paint.apply {
-                    strokeCap = Paint.Cap.ROUND
-                    strokeJoin = Paint.Join.ROUND
-                }
-            }
-        }
-    }
-
-    /**
-     * Note that the eraser mode is really just a NORMAL and SOLID brush with its XferMode set to
-     * [PorterDuff.Mode.CLEAR], so that we can keep track of the drawing paths of the eraser without
-     * introducing extra lists rather than the previous lists we defined in the [DrawViewState].
-     */
-    private fun toggleEraser(isEraserOn: Boolean) {
-        changeStrokeWidthSrc(isEraserOn)
-
-        if (isEraserOn) {
-            brushType = BrushType.NORMAL
-            if (_lineType != LineType.ERASER) {
-                _lineType = LineType.ERASER
-            }
-
-            drawPaintOption.paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-        } else {
-            drawPaintOption.paint.xfermode = null
-        }
-    }
 
     override fun onDraw(canvas: Canvas) {
         setBackground(canvas)
 
         canvas.drawWithBlendLayer {
             drawPrevious(it)
-
             drawCurrent(it)
         }
 
@@ -587,12 +455,12 @@ class DrawView @JvmOverloads constructor(
      * set any upper bound limit, the maximum value of the bias will be log10([Float.MAX_VALUE]),
      * which is equal to 38.5318394234 and literally not suitable for drawing as signing pen.
      *
-     * Thus, we set the maximum bias value as [MAX_STROKE_WIDTH_BIAS].
+     * Thus, we set the maximum bias value as [DrawConst.MAX_STROKE_WIDTH_BIAS].
      */
     private fun obtainBiasByVelocity(
         velocityX: Float,
         velocityY: Float,
-        max: Float = MAX_STROKE_WIDTH_BIAS
+        max: Float = DrawConst.MAX_STROKE_WIDTH_BIAS
     ): Float {
         log10(1F + abs(velocityX.coerceAtLeast(velocityY))).also {
             return if (it >= max) {

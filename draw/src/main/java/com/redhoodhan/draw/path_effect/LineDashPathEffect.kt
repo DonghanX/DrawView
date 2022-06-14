@@ -1,4 +1,4 @@
-package com.redhoodhan.draw.data.path_effect
+package com.redhoodhan.draw.path_effect
 
 import android.graphics.DashPathEffect
 import java.util.*

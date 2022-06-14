@@ -1,33 +1,31 @@
-package com.redhoodhan.drawing.ui.draw
+package com.redhoodhan.drawing.ui.draw.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.redhoodhan.drawing.databinding.ItemBgImgResBinding
 import com.redhoodhan.drawing.databinding.ItemDrawResBinding
 
-class DrawImgResAdapter(private val imgList: List<Int>) :
-    RecyclerView.Adapter<DrawImgResAdapter.ViewHolder>() {
+class DrawColorResAdapter(private val colorList: List<Int>) :
+    RecyclerView.Adapter<DrawColorResAdapter.ViewHolder>() {
 
     private var _curSelectItemPosition: Int = 0
 
     val curSelectItemPosition: Int
         get() = _curSelectItemPosition
 
-    var imgSelectCallback: ((colorResId: Int) -> Unit)? = null
+    var colorSelectCallback: ((colorResId: Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        ItemBgImgResBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        ItemDrawResBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             .also {
                 return ViewHolder(it)
             }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val imgResId = imgList[position]
+        val colorResId = colorList[position]
 
-        holder.bindBackgroundRes(imgResId)
+        holder.bindBackgroundColor(colorResId)
         // Refresh the select state of the current item
         if (position == _curSelectItemPosition) {
             holder.setCurSelected(true)
@@ -36,9 +34,9 @@ class DrawImgResAdapter(private val imgList: List<Int>) :
         }
     }
 
-    override fun getItemCount(): Int = imgList.size
+    override fun getItemCount(): Int = colorList.size
 
-    inner class ViewHolder(private val binding: ItemBgImgResBinding) :
+    inner class ViewHolder(private val binding: ItemDrawResBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
@@ -47,7 +45,7 @@ class DrawImgResAdapter(private val imgList: List<Int>) :
 
         private fun performClickEvent() {
             val tempPosition = _curSelectItemPosition
-            imgSelectCallback?.invoke(imgList[adapterPosition])
+            colorSelectCallback?.invoke(colorList[adapterPosition])
             _curSelectItemPosition = adapterPosition
             setCurSelected(true)
 
@@ -56,14 +54,14 @@ class DrawImgResAdapter(private val imgList: List<Int>) :
             notifyItemChanged(tempPosition)
         }
 
-        fun bindBackgroundRes(imgRes: Int) {
-            binding.bgImage.apply {
-                setImageDrawable(ResourcesCompat.getDrawable(resources, imgRes, null))
-            }
+        fun bindBackgroundColor(colorRes: Int) {
+            binding.drawColorItem.drawColorResId = colorRes
         }
 
         fun setCurSelected(isSelected: Boolean) {
+            binding.drawColorItem.isCurSelected = isSelected
         }
 
     }
 }
+

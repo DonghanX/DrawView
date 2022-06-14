@@ -58,13 +58,15 @@ class DrawEraserFragment : Fragment() {
         binding.eraseSizeSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                viewModel.notifyChangeBrushSize(progress, isFromEraser = true)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                seekBar?.let {
+                    viewModel.notifyChangeBrushSize(it.progress, isFromEraser = true)
+                }
             }
 
         })

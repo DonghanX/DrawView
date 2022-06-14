@@ -1,18 +1,17 @@
 package com.redhoodhan.drawing.ui.draw
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.redhoodhan.draw.DrawView
-import com.redhoodhan.draw.data.draw_option.LineType
+import com.redhoodhan.draw.draw_option.data.LineType
 import com.redhoodhan.drawing.R
 import com.redhoodhan.drawing.databinding.ActivityMainBinding
 import com.redhoodhan.drawing.ui.common.StateImageButton
+import com.redhoodhan.drawing.ui.draw.adapter.DrawPagerAdapter
 import com.redhoodhan.drawing.util.AnimationUtil
 
 
@@ -321,6 +320,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleEraser() {
-        binding.drawView.isEraserOn = true
+        switchToLineType(LineType.ERASER)
     }
 }

@@ -2,6 +2,7 @@ package com.redhoodhan.drawing.ui.draw
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.redhoodhan.draw.draw_option.data.DrawConst.Companion.DEFAULT_STROKE_WIDTH
 import com.redhoodhan.drawing.ui.draw.DrawRepository
 import kotlin.properties.Delegates
 
@@ -60,7 +61,7 @@ class DrawViewModel : ViewModel() {
     val backgroundList: List<Int>?
         get() = mRepo?.backgroundList
 
-    var defaultBrushSize: Float = com.redhoodhan.draw.DEFAULT_STROKE_WIDTH
+    var defaultBrushSize: Float = DEFAULT_STROKE_WIDTH
 
     fun notifyChangeBrushSize(
         progress: Int,
