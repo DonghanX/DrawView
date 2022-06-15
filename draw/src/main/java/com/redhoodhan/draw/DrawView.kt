@@ -2,8 +2,10 @@ package com.redhoodhan.draw
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -92,10 +94,13 @@ class DrawView @JvmOverloads constructor(
         }
 
     init {
+        drawOptionContext = DrawOptionContext()
+
+        _drawState = DrawViewState()
+
         initDrawPaint()
 
-        drawOptionContext = DrawOptionContext()
-        _drawState = DrawViewState()
+        initDrawAttrFromTypedArray(attributeSet)
     }
 
     val drawStateRef
@@ -241,6 +246,54 @@ class DrawView @JvmOverloads constructor(
         }
     }
 
+    private fun initDrawAttrFromTypedArray(attributeSet: AttributeSet?) {
+        context.theme.obtainStyledAttributes(
+            attributeSet,
+            R.styleable.DrawView,
+            0,
+            0
+        ).apply {
+            try {
+                brushColor = getColor(R.styleable.DrawView_defaultBrushColor, brushColor)
+                brushSize = getFloat(R.styleable.DrawView_defaultBrushSize, brushSize)
+                eraserSize = getFloat(R.styleable.DrawView_defaultEraserSize, eraserSize)
+
+                handleDefaultBackgroundSetting(this)
+            } finally {
+                recycle()
+            }
+        }
+    }
+
+    /**
+     * This function is called to set the canvas background according to the custom styleable
+     * attribute. If the [R.styleable.DrawView_defaultCanvasBackgroundColor] and the
+     * [R.styleable.DrawView_defaultCanvasBackgroundImageRes] are both provided in the XML layouts, then
+     * the [canvasBackgroundImg] will be set to high priority and the [canvasBackgroundColor] will
+     * be ignored.
+     */
+    private fun handleDefaultBackgroundSetting(typedArray: TypedArray) {
+        val flag = DrawConst.BACKGROUND_ATTR_NOT_SET
+
+        val attrBackgroundColor =
+            typedArray.getColor(R.styleable.DrawView_defaultCanvasBackgroundColor, flag)
+        val attrBackgroundImgRes =
+            typedArray.getResourceId(R.styleable.DrawView_defaultCanvasBackgroundImageRes, flag)
+
+        // TODO: Refactor
+        when {
+            attrBackgroundColor == flag && attrBackgroundImgRes == flag -> return
+
+            attrBackgroundImgRes != flag -> {
+                post { canvasBackgroundImg = attrBackgroundImgRes }
+            }
+            attrBackgroundColor != flag && attrBackgroundImgRes == flag -> {
+                post { canvasBackgroundColor = attrBackgroundColor }
+            }
+        }
+
+    }
+
     /**
      * This function is called when the [DrawViewState.stateActionCallback] is triggered and triggers
      * the callbacks that passes the Boolean flag of corresponding state, by accessing the attribute
@@ -337,21 +390,18 @@ class DrawView @JvmOverloads constructor(
      */
     private fun setBackground(canvas: Canvas) {
 
-        if (isCanvasBackgroundImg) {
-            if (isCanvasBackgroundChanged) {
-                canvasBackgroundImg?.let {
-                    setBackgroundResource(it)
-                }
-                isCanvasBackgroundChanged = false
+        if (isCanvasBackgroundImg && isCanvasBackgroundChanged) {
+            canvasBackgroundImg?.let {
+                setBackgroundResource(it)
             }
-        } else {
-            if (isCanvasBackgroundChanged) {
-                // Removes previous background
-                setBackgroundResource(0)
-                // draw the pure color background
-                canvas.drawColor(canvasBackgroundColor)
-            }
+            isCanvasBackgroundChanged = false
+        } else if (isCanvasBackgroundChanged) {
+            // Removes previous background
+            setBackgroundResource(0)
+            // draw the pure color background
+            canvas.drawColor(canvasBackgroundColor)
         }
+
     }
 
     private fun drawCurrent(canvas: Canvas) {
@@ -377,17 +427,16 @@ class DrawView @JvmOverloads constructor(
         val touchX = event.x
         val touchY = event.y
 
+        // Intercepts the erasing process if the canvas is empty, thus eliminating unnecessary
+        // recordings of the eraser path and paint.
+        if (drawStateRef.isPathEmpty && lineType == LineType.ERASER) {
+            return true
+        }
+
         if (velocityTracker == null && needsWidthBias) {
             velocityTracker = VelocityTracker.obtain()
         }
         velocityTracker?.addMovement(event)
-
-//        // Double Buffer
-//        if (bufferBitmap == null) {
-//            bufferBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also {
-//                bufferCanvas = Canvas(it)
-//            }
-//        }
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {

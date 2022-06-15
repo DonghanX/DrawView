@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DrawView">
+        <attr name="defaultBrushSize" format="float" />
+        <attr name="defaultEraserSize" format="float" />
+        <attr name="defaultBrushColor" format="color" />
+        <attr name="defaultCanvasBackgroundColor" format="color" />
+        <attr name="defaultCanvasBackgroundImageRes" format="reference" />
+    </declare-styleable>
+</resources>

@@ -11,5 +11,7 @@ class DrawConst {
         const val MAX_STROKE_WIDTH_BIAS = 5F
         const val CHISEL_ALPHA = 80
         const val MAX_ALPHA = 255
+
+        const val BACKGROUND_ATTR_NOT_SET = -1
     }
 }
