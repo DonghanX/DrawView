@@ -1,4 +1,4 @@
-# Draw [![](https://jitpack.io/v/DonghanX/Draw.svg)](https://jitpack.io/#DonghanX/Draw)
+# Draw [![](https://jitpack.io/v/DonghanX/DrawView.svg)](https://jitpack.io/#DonghanX/DrawView)
 
 A simple Android view for drawing.
 
@@ -29,7 +29,7 @@ allprojects {
 #### Step 2. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.DonghanX:Draw:v1.0.1'
+    implementation 'com.github.DonghanX:Draw:v1.0.2'
 }
 ```
 
@@ -81,8 +81,6 @@ The `LineType` enum value and its description are as follows:
 | LineType.DASH | Dashed line with gap interval that is calculated by `brushSize` |
 | LineType.CHISEL | Chisel Tip line with alpha channel set to a specific value |
 | LineType.ERASER | Solid line with `Xfermode` set to `PorterDuff.Mode.CLEAR` |
-
-> Note that we can also toggle the eraser by assigning Boolean value to `DrawView.isEraserOn`.
 
 #### Undo
 ```Kotlin
