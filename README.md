@@ -2,7 +2,7 @@
 
 A simple Android view for drawing.
 
-<img src="screenshots/demo_with_canvas_background.gif" width="50%">
+<img src="screenshots/demo_with_canvas_background.gif" width="45%">
 
 ## Installation
 
@@ -29,7 +29,7 @@ allprojects {
 #### Step 2. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.DonghanX:Draw:v1.0.2'
+    implementation 'com.github.DonghanX:Draw:v1.0.3'
 }
 ```
 
