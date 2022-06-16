@@ -41,13 +41,39 @@ dependencies {
 * Save the Canvas as Bitmap.
 
 ## Usage
-#### Include `DrawView` in your layout.xml
+
+### Setup: 
+
+#### Include `DrawView` in your layout.xml directly
 ```XML
 <com.redhoodhan.draw.DrawView
     android:id="@+id/draw_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 ```
+
+#### (Alternatively) Include `DrawView` in your layout.xml with custom attributes setting
+```XML
+<com.redhoodhan.draw.DrawView
+    android:id="@+id/draw_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:defaultBrushColor="@color/purple"
+    app:defaultBrushSize="20F"
+    app:defaultCanvasBackgroundImageRes="@drawable/img_draw_background_1"
+    app:defaultEraserSize="15F" />
+```
+
+| Attribute Name | Format | Description |
+| :----: | :----: | :----: |
+| defaultBrushSize | Float | The default value of brush size |
+| defaultEraserSize | Float | The default value of eraser size |
+| defaultBrushColor | Color | The default stroke color of brush paint |
+| defaultCanvasBackgroundColor | Color | The default color of canvas background |
+| defaultCanvasBackgroundImageRes | Reference | The default image resource ID of canvas background|
+> Note that setting `defaultCanvasBackgroundImageRes` will override the effect of `defaultCanvasBackgroundColor`.
+
+### Further Usage: 
 
 #### (Optional) Implement the callbacks
 * `drawViewPressCallback`: Invoked when you press the `DrawView`.
@@ -74,7 +100,6 @@ binding.drawView.lineType = LineType.SOLID
 ```
 `LineType` is utilized by `DrawView` to modify the path properties and paint options, such as `StrokeStyle`, `Alpha` and `PathEffect`.
 
-The `LineType` enum value and its description are as follows:
 | LineType | Description |
 | :----: | :----: |
 | LineType.SOLID | Solid line |
